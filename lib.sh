@@ -77,17 +77,6 @@ function require_gem() {
     ok
 }
 
-function require_npm() {
-    sourceNVM
-    nvm use stable
-    running "npm $1"
-    npm list -g --depth 0 | grep $1@ > /dev/null
-    if [[ $? != 0 ]]; then
-        action "npm install -g $1"
-        npm install -g $1
-    fi
-    ok
-}
 
 function require_apm() {
     running "checking atom plugin: $1"
@@ -96,27 +85,6 @@ function require_apm() {
         action "apm install $1"
         apm install $1
     fi
-    ok
-}
-
-function sourceNVM(){
-    export NVM_DIR=~/.nvm
-    source $(brew --prefix nvm)/nvm.sh
-}
-
-
-function require_nvm() {
-    mkdir -p ~/.nvm
-    cp $(brew --prefix nvm)/nvm-exec ~/.nvm/
-    sourceNVM
-    nvm install $1
-    if [[ $? != 0 ]]; then
-        action "installing nvm"
-        curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.25.4/install.sh | bash
-        . ~/.bashrc
-        nvm install $1
-    fi
-    nvm use $1
     ok
 }
 

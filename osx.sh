@@ -8,22 +8,22 @@ source ./lib.sh
 bot "checking sudo state..."
 if sudo grep -q "# %wheel\tALL=(ALL) NOPASSWD: ALL" "/etc/sudoers"; then
 
-  promptSudo
+promptSudo
 
-  bot "Do you want me to setup this machine to allow you to run sudo without a password?\nPlease read here to see what I am doing:\nhttp://wiki.summercode.com/sudo_without_a_password_in_mac_os_x \n"
+bot "Do you want me to setup this machine to allow you to run sudo without a password?\nPlease read here to see what I am doing:\nhttp://wiki.summercode.com/sudo_without_a_password_in_mac_os_x \n"
 
-  read -r -p "Make sudo passwordless? [y|N] " response
+read -r -p "Make sudo passwordless? [y|N] " response
 
-  if [[ $response =~ (yes|y|Y) ]];then
-      sed --version
-      if [[ $? == 0 ]];then
-          sudo sed -i 's/^#\s*\(%wheel\s\+ALL=(ALL)\s\+NOPASSWD:\s\+ALL\)/\1/' /etc/sudoers
-      else
-          sudo sed -i '' 's/^#\s*\(%wheel\s\+ALL=(ALL)\s\+NOPASSWD:\s\+ALL\)/\1/' /etc/sudoers
-      fi
-      sudo dscl . append /Groups/wheel GroupMembership $(whoami)
-      bot "You can now run sudo commands without password!"
-  fi
+if [[ $response =~ (yes|y|Y) ]];then
+sed --version
+if [[ $? == 0 ]];then
+sudo sed -i 's/^#\s*\(%wheel\s\+ALL=(ALL)\s\+NOPASSWD:\s\+ALL\)/\1/' /etc/sudoers
+else
+sudo sed -i '' 's/^#\s*\(%wheel\s\+ALL=(ALL)\s\+NOPASSWD:\s\+ALL\)/\1/' /etc/sudoers
+fi
+sudo dscl . append /Groups/wheel GroupMembership $(whoami)
+bot "You can now run sudo commands without password!"
+fi
 fi
 ok
 
@@ -34,20 +34,20 @@ ok
 running "checking homebrew install"
 brew_bin=$(which brew) 2>&1 > /dev/null
 if [[ $? != 0 ]]; then
-	action "installing homebrew"
-    ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-    if [[ $? != 0 ]]; then
-    	error "unable to install homebrew, script $0 abort!"
-    	exit -1
-	fi
+action "installing homebrew"
+ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+if [[ $? != 0 ]]; then
+error "unable to install homebrew, script $0 abort!"
+exit -1
+fi
 fi
 ok
 
 running "checking brew-cask install"
 output=$(brew tap | grep cask)
 if [[ $? != 0 ]]; then
-	action "installing brew-cask"
-	require_brew caskroom/cask/brew-cask
+action "installing brew-cask"
+require_brew caskroom/cask/brew-cask
 fi
 ok
 
@@ -62,12 +62,12 @@ ok
 bot "before installing brew packages, we can upgrade any outdated packages."
 read -r -p "run brew upgrade? [y|N] " response
 if [[ $response =~ ^(y|yes|Y) ]];then
-    # Upgrade any already-installed formulae
-    action "upgrade brew packages..."
-    brew upgrade
-    ok "brews updated..."
+# Upgrade any already-installed formulae
+action "upgrade brew packages..."
+brew upgrade
+ok "brews updated..."
 else
-    ok "skipped brew package upgrades.";
+ok "skipped brew package upgrades.";
 fi
 
 bot "installing homebrew command-line tools"
@@ -86,11 +86,6 @@ require_brew findutils
 #install bash
 #install bash-completion
 
-# Install RingoJS and Narwhal
-# Note that the order in which these are installed is important; see http://git.io/brew-narwhal-ringo.
-#install ringojs
-#install narwhal
-
 # Install other useful binaries
 require_brew ack
 # Beanstalk http://kr.github.io/beanstalkd/
@@ -100,6 +95,7 @@ require_brew ack
 
 # docker setup:
 require_brew boot2docker
+require_brew mesos
 
 # dos2unix converts windows newlines to unix newlines
 require_brew dos2unix
@@ -125,20 +121,21 @@ require_brew imagemagick
 require_brew imagesnap
 # jq is a JSON grep
 require_brew jq
-# http://maven.apache.org/
+
 require_brew maven
 require_brew memcached
 require_brew nmap
-# require_brew node
-require_brew nvm
+
 require_brew redis
+
 # better/more recent version of screen
 require_brew homebrew/dupes/screen
 require_brew tig
 require_brew tree
 require_brew ttyrec
+
 # better, more recent vim
-require_brew vim --override-system-vi
+require_brew macvim --override-system-vi
 require_brew watch
 # Install wget with IRI support
 require_brew wget --enable-iri
@@ -147,33 +144,6 @@ bot "if you would like to start memcached at login, run this:"
 echo "ln -sfv /usr/local/opt/memcached/*.plist ~/Library/LaunchAgents"
 bot "if you would like to start memcached now, run this:"
 echo "launchctl load ~/Library/LaunchAgents/homebrew.mxcl.memcached.plist"
-
-# nvm
-require_nvm stable
-
-###############################################################################
-bot "NPM Globals..."
-###############################################################################
-
-require_npm antic
-require_npm bower
-# http://ionicframework.com/
-# require_npm cordova
-# require_npm ionic
-# https://github.com/markdalgleish/bespoke.js
-require_npm generator-bespoke
-require_npm grunt
-require_npm gulp
-require_npm jshint
-# http://devo.ps/blog/goodbye-node-forever-hello-pm2/
-require_npm pm2
-require_npm prettyjson
-# require_npm supervisor
-# https://github.com/sindresorhus/trash
-require_npm trash
-# https://github.com/MrRio/vtop
-require_npm vtop
-require_npm yo
 
 ###############################################################################
 bot "Ruby Gems..."
@@ -189,56 +159,53 @@ require_gem git-up
 bot "installing GUI tools via homebrew casks..."
 brew tap caskroom/versions > /dev/null 2>&1
 
+# base
+require_cask google-chrome
+require_cask the-unarchiver
+
 # cloud storage
-#require_cask amazon-cloud-drive
-require_cask box-sync
-#require_cask dropbox
-#require_cask evernote
-#require_cask skydrive
+require_cask dropbox
+require_cask evernote
 
 # communication
-#require_cask adium
+require_cask skype
 require_cask slack
 
-require_cask caffeine
+# media
+require_cask vlc
+require_cask spotify
 
 # tools
-#require_cask comicbooklover
+require_cask caffeine
 require_cask diffmerge
-#require_cask flash-player
-require_cask github
 require_cask gpgtools
-require_cask ireadfast
 require_cask iterm2
-#require_cask macvim
-require_cask sizeup
-#require_cask simple-comic
-#require_cask sketchup
 
-require_cask atom
-# require_apm linter
-# require_apm linter-eslint
-# require_apm atom-beautify
+
+
 
 require_cask the-unarchiver
-#require_cask transmission
-require_cask vlc
 require_cask xquartz
+
+# atom
+require_cask atom
+require_apm linter
+require_apm linter-eslint
+require_apm atom-beautify
+
 
 # development browsers
 # require_cask breach
 # require_cask firefox
 #require_cask firefox-aurora
-require_cask google-chrome
-# require_cask google-chrome-canary
-# require_cask torbrowser
 
-# virtal machines
+
+# virtual machines
 require_cask virtualbox
 # chef-dk, berkshelf, etc
 #require_cask chefdk
 # vagrant for running dev environments using docker images
-#require_cask vagrant # # | grep Caskroom | sed "s/.*'\(.*\)'.*/open \1\/Vagrant.pkg/g" | sh
+require_cask vagrant | grep Caskroom | sed "s/.*'\(.*\)'.*/open \1\/Vagrant.pkg/g" | sh
 
 
 
@@ -300,13 +267,13 @@ sudo chflags uchg /Private/var/vm/sleepimage;ok
 # launchctl unload -w /System/Library/LaunchAgents/com.apple.rcd.plist 2> /dev/null;ok
 
 # running "Show icons for hard drives, servers, and removable media on the desktop"
-# defaults write com.apple.finder ShowExternalHardDrivesOnDesktop -bool true
-# defaults write com.apple.finder ShowHardDrivesOnDesktop -bool true
-# defaults write com.apple.finder ShowMountedServersOnDesktop -bool true
-# defaults write com.apple.finder ShowRemovableMediaOnDesktop -bool true;ok
+defaults write com.apple.finder ShowExternalHardDrivesOnDesktop -bool true
+defaults write com.apple.finder ShowHardDrivesOnDesktop -bool true
+defaults write com.apple.finder ShowMountedServersOnDesktop -bool true
+defaults write com.apple.finder ShowRemovableMediaOnDesktop -bool true;ok
 
 # running "Enable the MacBook Air SuperDrive on any Mac"
-# sudo nvram boot-args="mbasd=1";ok
+sudo nvram boot-args="mbasd=1";ok
 
 # running "Remove Dropbox’s green checkmark icons in Finder"
 # file=/Applications/Dropbox.app/Contents/Resources/emblem-dropbox-uptodate.icns
@@ -356,16 +323,16 @@ defaults write NSGlobalDomain AppleEnableMenuBarTransparency -bool false;ok
 
 running "Menu bar: hide the Time Machine, Volume, User, and Bluetooth icons"
 for domain in ~/Library/Preferences/ByHost/com.apple.systemuiserver.*; do
-	defaults write "${domain}" dontAutoLoad -array \
-		"/System/Library/CoreServices/Menu Extras/TimeMachine.menu" \
-		"/System/Library/CoreServices/Menu Extras/Volume.menu" \
-		"/System/Library/CoreServices/Menu Extras/User.menu"
+defaults write "${domain}" dontAutoLoad -array \
+"/System/Library/CoreServices/Menu Extras/TimeMachine.menu" \
+"/System/Library/CoreServices/Menu Extras/Volume.menu" \
+"/System/Library/CoreServices/Menu Extras/User.menu"
 done;
 defaults write com.apple.systemuiserver menuExtras -array \
-	"/System/Library/CoreServices/Menu Extras/Bluetooth.menu" \
-	"/System/Library/CoreServices/Menu Extras/AirPort.menu" \
-	"/System/Library/CoreServices/Menu Extras/Battery.menu" \
-	"/System/Library/CoreServices/Menu Extras/Clock.menu"
+"/System/Library/CoreServices/Menu Extras/Bluetooth.menu" \
+"/System/Library/CoreServices/Menu Extras/AirPort.menu" \
+"/System/Library/CoreServices/Menu Extras/Battery.menu" \
+"/System/Library/CoreServices/Menu Extras/Clock.menu"
 ok
 
 running "Set highlight color to green"
@@ -581,9 +548,9 @@ chflags nohidden ~/Library;ok
 
 running "Expand the following File Info panes: “General”, “Open with”, and “Sharing & Permissions”"
 defaults write com.apple.finder FXInfoPanesExpanded -dict \
-	General -bool true \
-	OpenWith -bool true \
-	Privileges -bool true;ok
+General -bool true \
+OpenWith -bool true \
+Privileges -bool true;ok
 
 ###############################################################################
 bot "Dock & Dashboard"
@@ -646,29 +613,6 @@ find "${HOME}/Library/Application Support/Dock" -name "*-*.db" -maxdepth 1 -dele
 running "Add iOS Simulator to Launchpad"
 sudo ln -sf "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/Applications/iPhone Simulator.app" "/Applications/iOS Simulator.app";ok
 
-
-bot "Configuring Hot Corners"
-# Possible values:
-#  0: no-op
-#  2: Mission Control
-#  3: Show application windows
-#  4: Desktop
-#  5: Start screen saver
-#  6: Disable screen saver
-#  7: Dashboard
-# 10: Put display to sleep
-# 11: Launchpad
-# 12: Notification Center
-
-running "Top left screen corner → Mission Control"
-defaults write com.apple.dock wvous-tl-corner -int 2
-defaults write com.apple.dock wvous-tl-modifier -int 0;ok
-running "Top right screen corner → Desktop"
-defaults write com.apple.dock wvous-tr-corner -int 4
-defaults write com.apple.dock wvous-tr-modifier -int 0;ok
-running "Bottom right screen corner → Start screen saver"
-defaults write com.apple.dock wvous-br-corner -int 5
-defaults write com.apple.dock wvous-br-modifier -int 0;ok
 
 ###############################################################################
 bot "Configuring Safari & WebKit"
@@ -747,22 +691,22 @@ running "Disable Spotlight indexing for any volume that gets mounted and has not
 sudo defaults write /.Spotlight-V100/VolumeConfiguration Exclusions -array "/Volumes";ok
 running "Change indexing order and disable some file types from being indexed"
 defaults write com.apple.spotlight orderedItems -array \
-	'{"enabled" = 1;"name" = "APPLICATIONS";}' \
-	'{"enabled" = 1;"name" = "SYSTEM_PREFS";}' \
-	'{"enabled" = 1;"name" = "DIRECTORIES";}' \
-	'{"enabled" = 1;"name" = "PDF";}' \
-	'{"enabled" = 1;"name" = "FONTS";}' \
-	'{"enabled" = 0;"name" = "DOCUMENTS";}' \
-	'{"enabled" = 0;"name" = "MESSAGES";}' \
-	'{"enabled" = 0;"name" = "CONTACT";}' \
-	'{"enabled" = 0;"name" = "EVENT_TODO";}' \
-	'{"enabled" = 0;"name" = "IMAGES";}' \
-	'{"enabled" = 0;"name" = "BOOKMARKS";}' \
-	'{"enabled" = 0;"name" = "MUSIC";}' \
-	'{"enabled" = 0;"name" = "MOVIES";}' \
-	'{"enabled" = 0;"name" = "PRESENTATIONS";}' \
-	'{"enabled" = 0;"name" = "SPREADSHEETS";}' \
-	'{"enabled" = 0;"name" = "SOURCE";}';ok
+'{"enabled" = 1;"name" = "APPLICATIONS";}' \
+'{"enabled" = 1;"name" = "SYSTEM_PREFS";}' \
+'{"enabled" = 1;"name" = "DIRECTORIES";}' \
+'{"enabled" = 1;"name" = "PDF";}' \
+'{"enabled" = 1;"name" = "FONTS";}' \
+'{"enabled" = 0;"name" = "DOCUMENTS";}' \
+'{"enabled" = 0;"name" = "MESSAGES";}' \
+'{"enabled" = 0;"name" = "CONTACT";}' \
+'{"enabled" = 0;"name" = "EVENT_TODO";}' \
+'{"enabled" = 0;"name" = "IMAGES";}' \
+'{"enabled" = 0;"name" = "BOOKMARKS";}' \
+'{"enabled" = 0;"name" = "MUSIC";}' \
+'{"enabled" = 0;"name" = "MOVIES";}' \
+'{"enabled" = 0;"name" = "PRESENTATIONS";}' \
+'{"enabled" = 0;"name" = "SPREADSHEETS";}' \
+'{"enabled" = 0;"name" = "SOURCE";}';ok
 running "Load new settings before rebuilding the index"
 killall mds > /dev/null 2>&1;ok
 running "Make sure indexing is enabled for the main volume"
@@ -781,10 +725,10 @@ running "Use a modified version of the Solarized Dark theme by default in Termin
 TERM_PROFILE='Solarized Dark xterm-256color';
 CURRENT_PROFILE="$(defaults read com.apple.terminal 'Default Window Settings')";
 if [ "${CURRENT_PROFILE}" != "${TERM_PROFILE}" ]; then
-	open "./configs/${TERM_PROFILE}.terminal";
-	sleep 1; # Wait a bit to make sure the theme is loaded
-	defaults write com.apple.terminal 'Default Window Settings' -string "${TERM_PROFILE}";
-	defaults write com.apple.terminal 'Startup Window Settings' -string "${TERM_PROFILE}";
+open "./configs/${TERM_PROFILE}.terminal";
+sleep 1; # Wait a bit to make sure the theme is loaded
+defaults write com.apple.terminal 'Default Window Settings' -string "${TERM_PROFILE}";
+defaults write com.apple.terminal 'Startup Window Settings' -string "${TERM_PROFILE}";
 fi;
 
 #running "Enable “focus follows mouse” for Terminal.app and all X11 apps"
@@ -906,7 +850,7 @@ defaults write com.irradiatedsoftware.SizeUp ShowPrefsOnNextStart -bool false;ok
 ###############################################################################
 bot "OK. Note that some of these changes require a logout/restart to take effect. Killing affected applications (so they can reboot)...."
 for app in "Activity Monitor" "Address Book" "Calendar" "Contacts" "cfprefsd" \
-	"Dock" "Finder" "Mail" "Messages" "Safari" "SizeUp" "SystemUIServer" \
-	"iCal" "Terminal"; do
-	killall "${app}" > /dev/null 2>&1
+"Dock" "Finder" "Mail" "Messages" "Safari" "SizeUp" "SystemUIServer" \
+"iCal" "Terminal"; do
+killall "${app}" > /dev/null 2>&1
 done

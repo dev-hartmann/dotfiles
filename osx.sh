@@ -72,6 +72,12 @@ fi
 
 bot "installing homebrew command-line tools"
 
+# Install java first, coz it's a requirement for a lot of other things
+require_cask java
+require_brew zsh
+#install spf13 vim
+curl http://j.mp/spf13-vim3 -L -o - | sh
+
 
 # Install GNU core utilities (those that come with OS X are outdated)
 # Don’t forget to add `$(brew --prefix coreutils)/libexec/gnubin` to `$PATH`.
@@ -95,15 +101,12 @@ require_brew ack
 
 # docker setup:
 require_brew boot2docker
-require_brew mesos
 
 # dos2unix converts windows newlines to unix newlines
 require_brew dos2unix
 # fortune command--I source this as a better motd :)
 require_brew fortune
 require_brew gawk
-# http://www.lcdf.org/gifsicle/ (because I'm a gif junky)
-require_brew gifsicle
 # skip those GUI clients, git command-line all the way
 require_brew git
 # yes, yes, use git-flow, please :)
@@ -113,7 +116,11 @@ require_brew gnupg
 # Install GNU `sed`, overwriting the built-in `sed`
 # so we can do "sed -i 's/foo/bar/' file" instead of "sed -i '' 's/foo/bar/' file"
 require_brew gnu-sed --default-names
+
 require_brew go
+require_brew leiningen
+require_brew sbt
+
 # better, more recent grep
 require_brew homebrew/dupes/grep
 require_brew hub
@@ -180,9 +187,7 @@ require_cask caffeine
 require_cask diffmerge
 require_cask gpgtools
 require_cask iterm2
-
-
-
+require_cask intellij-idea-ce
 
 require_cask the-unarchiver
 require_cask xquartz
@@ -193,13 +198,6 @@ require_apm linter
 require_apm linter-eslint
 require_apm atom-beautify
 
-
-# development browsers
-# require_cask breach
-# require_cask firefox
-#require_cask firefox-aurora
-
-
 # virtual machines
 require_cask virtualbox
 # chef-dk, berkshelf, etc
@@ -209,10 +207,9 @@ require_cask vagrant | grep Caskroom | sed "s/.*'\(.*\)'.*/open \1\/Vagrant.pkg/
 
 
 
-# bot "Alright, cleaning up homebrew cache..."
-# Remove outdated versions from the cellar
-# brew cleanup > /dev/null 2>&1
-# bot "All clean"
+bot "Alright, cleaning up homebrew cache..."
+brew cleanup > /dev/null 2>&1
+bot "All clean"
 
 ###############################################################################
 bot "Configuring General System UI/UX..."
@@ -295,14 +292,6 @@ sudo nvram boot-args="mbasd=1";ok
 #running "Add a spacer to the right side of the Dock (where the Trash is)"
 #defaults write com.apple.dock persistent-others -array-add '{tile-data={}; tile-type="spacer-tile";}';ok
 
-running "Set a custom wallpaper image"
-# `DefaultDesktop.jpg` is already a symlink, and
-# all wallpapers are in `/Library/Desktop Pictures/`. The default is `Wave.jpg`.
-rm -rf ~/Library/Application Support/Dock/desktoppicture.db
-sudo rm -rf /System/Library/CoreServices/DefaultDesktop.jpg
-sudo ln -s ~/.dotfiles/img/wallpaper.jpg /System/Library/CoreServices/DefaultDesktop.jpg;ok
-
-
 ################################################
 bot "Standard System Changes"
 ################################################
@@ -337,13 +326,6 @@ ok
 
 running "Set highlight color to green"
 defaults write NSGlobalDomain AppleHighlightColor -string "0.764700 0.976500 0.568600";ok
-
-running "Set sidebar icon size to medium"
-defaults write NSGlobalDomain NSTableViewDefaultSizeMode -int 2;ok
-
-running "Always show scrollbars"
-defaults write NSGlobalDomain AppleShowScrollBars -string "Always";ok
-# Possible values: `WhenScrolling`, `Automatic` and `Always`
 
 running "Increase window resize speed for Cocoa applications"
 defaults write NSGlobalDomain NSWindowResizeTime -float 0.001;ok
@@ -486,9 +468,6 @@ running "Set Desktop as the default location for new Finder windows"
 defaults write com.apple.finder NewWindowTarget -string "PfDe"
 defaults write com.apple.finder NewWindowTargetPath -string "file://${HOME}/Desktop/";ok
 
-running "Show hidden files by default"
-defaults write com.apple.finder AppleShowAllFiles -bool true;ok
-
 running "Show all filename extensions"
 defaults write NSGlobalDomain AppleShowAllExtensions -bool true;ok
 
@@ -535,9 +514,6 @@ defaults write com.apple.finder FXPreferredViewStyle -string "Nlsv";ok
 
 running "Disable the warning before emptying the Trash"
 defaults write com.apple.finder WarnOnEmptyTrash -bool false;ok
-
-running "Empty Trash securely by default"
-defaults write com.apple.finder EmptyTrashSecurely -bool true;ok
 
 running "Enable AirDrop over Ethernet and on unsupported Macs running Lion"
 defaults write com.apple.NetworkBrowser BrowseAllInterfaces -bool true;ok
@@ -833,17 +809,6 @@ bot "Google Chrome & Google Chrome Canary"
 running "Allow installing user scripts via GitHub Gist or Userscripts.org"
 defaults write com.google.Chrome ExtensionInstallSources -array "https://gist.githubusercontent.com/" "http://userscripts.org/*"
 defaults write com.google.Chrome.canary ExtensionInstallSources -array "https://gist.githubusercontent.com/" "http://userscripts.org/*";ok
-
-###############################################################################
-bot "SizeUp.app"
-###############################################################################
-
-running "Start SizeUp at login"
-defaults write com.irradiatedsoftware.SizeUp StartAtLogin -bool true;ok
-
-running "Don’t show the preferences window on next start"
-defaults write com.irradiatedsoftware.SizeUp ShowPrefsOnNextStart -bool false;ok
-
 
 ###############################################################################
 # Kill affected applications                                                  #

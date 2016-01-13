@@ -75,10 +75,37 @@ bot "installing homebrew command-line tools"
 # Install java first, coz it's a requirement for a lot of other things
 require_cask java
 require_brew zsh
-#install spf13 vim
+
+##VIM
+#get spf13-vim up an running, with plugins
+
+bot "Updating Vim"
+
+action "get macvim with lua support"
+require_brew macvim --with-cscope --with-lua --override-system-vim
+ok "installed macvim"
+
+action "get updated vim with lua Support"
+require_brew vim --with-lua --override-system-vim
+ok "installed vim"
+
+action "update to spf13-vim"
 curl http://j.mp/spf13-vim3 -L -o - | sh
+ok "update to spf13-vim done!"
+
+#add vim-plugins, spf13 has local file!
+bot "installing vim plugins"
+
+echo "'fatih/vim-go'"  >> ~/.vimrc.local
+echo "'guns/vim-clojure-static'" >> ~/.vimrc.local
+echo "'tpope/vim-fireplace'" >> ~/.vimrc.local
+
+action "installing all bundles, could take a moment ..."
+vim +BundleInstall
+ok "done installing bundle"
 
 
+action "installing brew packages"
 # Install GNU core utilities (those that come with OS X are outdated)
 # Don’t forget to add `$(brew --prefix coreutils)/libexec/gnubin` to `$PATH`.
 require_brew coreutils
@@ -87,23 +114,9 @@ require_brew moreutils
 # Install GNU `find`, `locate`, `updatedb`, and `xargs`, `g`-prefixed
 require_brew findutils
 
-# Install Bash 4
-# Note: don’t forget to add `/usr/local/bin/bash` to `/etc/shells` before running `chsh`.
-#install bash
-#install bash-completion
-
-# Install other useful binaries
-require_brew ack
-# Beanstalk http://kr.github.io/beanstalkd/
-#require_brew beanstalkd
-# ln -sfv /usr/local/opt/beanstalk/*.plist ~/Library/LaunchAgents
-# launchctl load ~/Library/LaunchAgents/homebrew.mxcl.beanstalk.plist
-
 # docker setup:
-require_brew boot2docker
+require_cask dockertoolbox
 
-# dos2unix converts windows newlines to unix newlines
-require_brew dos2unix
 # fortune command--I source this as a better motd :)
 require_brew fortune
 require_brew gawk
@@ -167,8 +180,10 @@ bot "installing GUI tools via homebrew casks..."
 brew tap caskroom/versions > /dev/null 2>&1
 
 # base
+require_cask iterm2
 require_cask google-chrome
 require_cask the-unarchiver
+require_cask appcleaner
 
 # cloud storage
 require_cask dropbox
@@ -186,10 +201,6 @@ require_cask spotify
 require_cask caffeine
 require_cask diffmerge
 require_cask gpgtools
-require_cask iterm2
-require_cask intellij-idea-ce
-
-require_cask the-unarchiver
 require_cask xquartz
 
 # atom
@@ -198,14 +209,9 @@ require_apm linter
 require_apm linter-eslint
 require_apm atom-beautify
 
-# virtual machines
-require_cask virtualbox
-# chef-dk, berkshelf, etc
 #require_cask chefdk
 # vagrant for running dev environments using docker images
 require_cask vagrant | grep Caskroom | sed "s/.*'\(.*\)'.*/open \1\/Vagrant.pkg/g" | sh
-
-
 
 bot "Alright, cleaning up homebrew cache..."
 brew cleanup > /dev/null 2>&1
@@ -234,7 +240,7 @@ running "…and make sure it can’t be rewritten"
 sudo chflags uchg /Private/var/vm/sleepimage;ok
 
 #running "Disable the sudden motion sensor as it’s not useful for SSDs"
-# sudo pmset -a sms 0;ok
+sudo pmset -a sms 0;ok
 
 ################################################
 # Optional / Experimental                      #
@@ -815,7 +821,7 @@ defaults write com.google.Chrome.canary ExtensionInstallSources -array "https://
 ###############################################################################
 bot "OK. Note that some of these changes require a logout/restart to take effect. Killing affected applications (so they can reboot)...."
 for app in "Activity Monitor" "Address Book" "Calendar" "Contacts" "cfprefsd" \
-"Dock" "Finder" "Mail" "Messages" "Safari" "SizeUp" "SystemUIServer" \
+"Dock" "Finder" "Mail" "Messages" "Safari" "SystemUIServer" \
 "iCal" "Terminal"; do
 killall "${app}" > /dev/null 2>&1
 done

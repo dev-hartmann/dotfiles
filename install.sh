@@ -114,7 +114,6 @@ bot "creating symlinks for project dotfiles..."
 
 symlinkifne .crontab
 symlinkifne .gemrc
-symlinkifne .gitconfig
 symlinkifne .gitignore
 symlinkifne .profile
 symlinkifne .ruby-version

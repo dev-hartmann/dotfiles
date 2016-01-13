@@ -137,9 +137,6 @@ require_brew sbt
 require_brew homebrew/dupes/grep
 require_brew hub
 require_brew imagemagick
-require_brew imagesnap
-# jq is a JSON grep
-require_brew jq
 
 require_brew maven
 require_brew memcached
@@ -153,8 +150,6 @@ require_brew tig
 require_brew tree
 require_brew ttyrec
 
-# better, more recent vim
-require_brew macvim --override-system-vi
 require_brew watch
 # Install wget with IRI support
 require_brew wget --enable-iri

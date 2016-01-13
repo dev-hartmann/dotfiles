@@ -80,7 +80,6 @@ require_brew zsh
 #get spf13-vim up an running, with plugins
 
 bot "Updating Vim"
-
 action "get macvim with lua support"
 require_brew macvim --with-cscope --with-lua --override-system-vim
 ok "installed macvim"
